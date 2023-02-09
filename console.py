@@ -76,7 +76,6 @@ class HBNBCommand(cmd.Cmd):
         if len(list) == 2 and list[0] == "BaseModel":
             key = f"{list[0]}.{list[1]}"
             objects = storage.all()
-            print(key)
             if key in objects.keys():
                 #dict = objects[key]
                 obj = BaseModel(**objects[key])
@@ -88,7 +87,7 @@ class HBNBCommand(cmd.Cmd):
         print("""Prints the string representation of an instance based on
 the class name and id ( ex: BaseModel 1234-1234-1234)\n""")
 
-    def do_distroy(self, line):
+    def do_destroy(self, line):
         """Deletes an instance based on the class name and id
            (save the change into the JSON file). 
            Ex: $ destroy BaseModel 1234-1234-1234
@@ -100,11 +99,49 @@ the class name and id ( ex: BaseModel 1234-1234-1234)\n""")
           ** no instance found **: If the instance of the class name
              doesn’t exist for the id\n
         """
-        wq
+        list = line.split()
+        if len(list) == 0:
+             print("** class name missing **")
+             return
+        if len(list) == 1:
+            print("** instance id missing **")
+            return
+        if len(list) == 2 and list[0] != "BaseModel":
+            print("** class doesn't exist **")
+            return
+        if len(list) == 2 and list[0] == "BaseModel":
+            key = f"{list[0]}.{list[1]}"
+            objects = storage.all()
+            if key in objects.keys():
+                del objects[key]
+                storage.save()
+            else:
+                print("** instance id missing **")
 
-    def help_distroy(self):
+    def help_destroy(self):
         print("""Deletes an instance based on the class name and id
 (save the change into the JSON file). Ex: $ destroy BaseModel 1234-1234-1234.""")
+
+    def do_all(self, line):
+        """Prints all string representation of all instances based or not on the 
+           class name. Ex: $ all BaseModel or $ all.
+        Role:
+            ** class doesn't exist **: If the class name doesn’t exist,
+        """
+        list = line.split()
+        if len(list) and list[0] != "BaseModel":
+            print("** class doesn't exist **")
+            return
+
+        objs = storage.all()
+        str_list = []
+        for key in objs.keys():
+            obj = BaseModel(**objs[key])
+            str_list.append(str(obj))
+        print(str_list)
+
+    def help_all(self):
+        print("Prints a list of string representation of all instances")
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.
