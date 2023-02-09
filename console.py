@@ -38,17 +38,73 @@ class HBNBCommand(cmd.Cmd):
         """
         list = line.split()
         if len(list) == 0:
-             print(self.error_msg(0))
+             print("** class name missing **")
              return
         elif len(list) == 1 and list[0] != "BaseModel":
-            print(self.error_msg(1))
+            print("** class doesn't exist **")
             return
         else:
             my_model = BaseModel()
+            my_model.save()
             print(my_model.id)
 
     def help_create(self):
         print("Creates a new instance of BaseModel class. \n")
+
+    def do_show(self, line):
+        """ Prints the string representation of an instance based
+            on the class name and id. Ex: $ show BaseModel 1234-1234-1234
+
+           Prints:
+             ** class name missing **: If the class name is missing,
+             ** class doesn't exist **: If the class name doesn’t exist,
+             ** instance id missing **: If the instance of the class name
+                  doesn’t exist for the id
+             ** no instance found **: If the instance of the class name doesn’t
+                  exist for the id
+        """
+        list = line.split()
+        if len(list) == 0:
+             print("** class name missing **")
+             return
+        if len(list) == 1:
+            print("** instance id missing **")
+            return
+        if len(list) == 2 and list[0] != "BaseModel":
+            print("** class doesn't exist **")
+            return
+        if len(list) == 2 and list[0] == "BaseModel":
+            key = f"{list[0]}.{list[1]}"
+            objects = storage.all()
+            print(key)
+            if key in objects.keys():
+                #dict = objects[key]
+                obj = BaseModel(**objects[key])
+                print(obj)
+            else:
+                print("** instance id missing **")
+
+    def help_show(self):
+        print("""Prints the string representation of an instance based on
+the class name and id ( ex: BaseModel 1234-1234-1234)\n""")
+
+    def do_distroy(self, line):
+        """Deletes an instance based on the class name and id
+           (save the change into the JSON file). 
+           Ex: $ destroy BaseModel 1234-1234-1234
+
+        Prints:
+          ** class name missing **: If the class name is missing
+          ** class doesn't exist **: If the class name doesn’t exist
+          ** instance id missing **: If the id is missing
+          ** no instance found **: If the instance of the class name
+             doesn’t exist for the id\n
+        """
+        wq
+
+    def help_distroy(self):
+        print("""Deletes an instance based on the class name and id
+(save the change into the JSON file). Ex: $ destroy BaseModel 1234-1234-1234.""")
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.
@@ -60,16 +116,6 @@ class HBNBCommand(cmd.Cmd):
         if self.lastcmd:
             self.lastcmd = ""
             return self.onecmd('\n')
-
-    def error_msg(self, param):
-        """Error massage handling"""
-        switcher = {
-            0: "** class name missing **",
-            1: "** class doesn't exist **",
-            2: "** instance id missing **",
-        }
-
-        return switcher[param]
 
 
 if __name__ == '__main__':

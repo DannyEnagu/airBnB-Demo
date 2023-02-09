@@ -36,10 +36,10 @@ class BaseModel():
         if kwargs and len(kwargs) > 0:
             for key in kwargs:
                 if key != "__class__":
-                    self.__setattr__(key, kwargs[key])
-                if key == "created_at" and key == "updated_at":
-                    self.__setattr__(key, fromisoformat(kwargs[key]))
-
+                    if key == "created_at" or key == "updated_at":
+                        self.__setattr__(key, datetime.fromisoformat(kwargs[key]))
+                    else:
+                        self.__setattr__(key, kwargs[key])
         else:
             self.id = uuid4().__str__()
             self.created_at = datetime.now()
