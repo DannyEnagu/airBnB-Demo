@@ -4,7 +4,7 @@
 """
 from uuid import uuid4
 from datetime import datetime
-from models import storage
+import models
 
 
 class BaseModel():
@@ -44,17 +44,17 @@ class BaseModel():
             self.id = uuid4().__str__()
             self.created_at = datetime.now()
             self.updated_at = datetime.now()
-            storage.new(self)
+            models.storage.new(self)
 
     def save(self):
-        self.updated_at = datetime.now().isoformat()
-        storage.save()
+        self.updated_at = datetime.now()
+        models.storage.save()
 
     def to_dict(self):
         """returns a dictionary containing all keys/values of __dict__
            of the instance.
         """
-        new_dict = self.__dict__
+        new_dict = self.__dict__.copy()
         new_dict["__class__"] = self.__class__.__name__
         new_dict["updated_at"] = self.updated_at.isoformat()
         new_dict["created_at"] = self.created_at.isoformat()
