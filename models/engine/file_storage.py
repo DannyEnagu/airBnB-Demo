@@ -12,8 +12,10 @@ from models.review import Review
 import json
 import os.path
 
-cls = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
-           "Place": Place, "Review": Review, "State": State, "User": User}
+cls = {
+        "Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+        "Place": Place, "Review": Review, "State": State, "User": User
+      }
 
 
 class FileStorage:
@@ -25,7 +27,7 @@ class FileStorage:
        __objects (dictionary): stores objects by id (ex: BaseModel.12121212)
     """
     __file_Path = "./file.json"
-    __objects = {} 
+    __objects = {}
 
     def all(self):
         """Returns a dictionary that contains all object"""
@@ -51,7 +53,7 @@ class FileStorage:
     def reload(self):
         filename = self.__file_Path
         if os.path.exists(filename):
-                with open(filename, "r") as jsonfile:
-                    ds = json.load(jsonfile)
-                    for k in ds:
-                        self.__objects[k] = cls[ds[k]["__class__"]](**ds[k])
+            with open(filename, "r") as jsonfile:
+                ds = json.load(jsonfile)
+                for k in ds:
+                    self.__objects[k] = cls[ds[k]["__class__"]](**ds[k])

@@ -4,6 +4,7 @@
 """
 from .base_model import BaseModel
 
+
 class City(BaseModel):
     """Defines a new class``City`` that inherits from ``BaseModel``
 
