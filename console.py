@@ -4,11 +4,18 @@
    python's ``cmd`` model.
 """
 import cmd
-from models.base_model import BaseModel 
 from models import storage
+from models.amenity import Amenity
+from models.base_model import BaseModel
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
+import shlex
 
-#print(BaseModel())
-#print(storage.all())
+classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class HBNBCommand(cmd.Cmd):
@@ -36,17 +43,20 @@ class HBNBCommand(cmd.Cmd):
            ** class name missing **: If the class name is missing
            ** class doesn't exist **: If the class name doesn’t exis
         """
-        list = line.split()
-        if len(list) == 0:
+        args = line.split()
+        if len(args) == 0:
              print("** class name missing **")
              return
-        elif len(list) == 1 and list[0] != "BaseModel":
+        if args[0] in classes:
+            #new_dict = self.input_parcer(args[1:])
+            #print(new_dict)
+            new = classes[args[0]]()
+        else:
             print("** class doesn't exist **")
             return
-        else:
-            my_model = BaseModel()
-            my_model.save()
-            print(my_model.id)
+        #print(new)
+        print(new.id)
+        new.save()
 
     def help_create(self):
         print("Creates a new instance of BaseModel class. \n")
@@ -63,25 +73,21 @@ class HBNBCommand(cmd.Cmd):
              ** no instance found **: If the instance of the class name doesn’t
                   exist for the id
         """
-        list = line.split()
-        if len(list) == 0:
+        args = line.split()
+        if len(args) == 0:
              print("** class name missing **")
              return
-        if len(list) == 1:
+        if len(args) == 1:
             print("** instance id missing **")
             return
-        if len(list) == 2 and list[0] != "BaseModel":
+        if len(args) > 1 and args[0] in classes:
+            key = f"{args[0]}.{args[1]}"
+            objects = storage.all()
+            obj = objects[key]
+            print(obj)
+        else:
             print("** class doesn't exist **")
             return
-        if len(list) == 2 and list[0] == "BaseModel":
-            key = f"{list[0]}.{list[1]}"
-            objects = storage.all()
-            if key in objects.keys():
-                #dict = objects[key]
-                obj = BaseModel(**objects[key])
-                print(obj)
-            else:
-                print("** instance id missing **")
 
     def help_show(self):
         print("""Prints the string representation of an instance based on
@@ -99,32 +105,33 @@ the class name and id ( ex: BaseModel 1234-1234-1234)\n""")
           ** no instance found **: If the instance of the class name
              doesn’t exist for the id\n
         """
-        list = line.split()
-        if len(list) == 0:
+        args = line.split()
+        if len(args) == 0:
              print("** class name missing **")
              return
-        if len(list) == 1:
+        if len(args) == 1:
             print("** instance id missing **")
             return
-        if len(list) == 2 and list[0] != "BaseModel":
+        #if len(args) == 2 and classes.get(args[0]) == None:
+        if len(args) == 2 and args[0] in classes:
+            key = f"{args[0]}.{args[1]}"
+            objects = storage.all()
+            if objects.get(key) == None:
+                print("** no instance found **")
+                return
+            del objects[key]
+            storage.save()
+        else:
             print("** class doesn't exist **")
             return
-        if len(list) == 2 and list[0] == "BaseModel":
-            key = f"{list[0]}.{list[1]}"
-            objects = storage.all()
-            if key in objects.keys():
-                del objects[key]
-                storage.save()
-            else:
-                print("** instance id missing **")
 
     def help_destroy(self):
         print("""Deletes an instance based on the class name and id
 (save the change into the JSON file). Ex: $ destroy BaseModel 1234-1234-1234.""")
 
     def do_all(self, line):
-        """Prints all string representation of all instances based or not on the 
-           class name. Ex: $ all BaseModel or $ all.
+        """Prints all string representation of all instances based or not
+           to the class name. Ex: $ all BaseModel or $ all.
         Role:
             ** class doesn't exist **: If the class name doesn’t exist,
         """
@@ -133,15 +140,81 @@ the class name and id ( ex: BaseModel 1234-1234-1234)\n""")
             print("** class doesn't exist **")
             return
 
-        objs = storage.all()
-        str_list = []
-        for key in objs.keys():
-            obj = BaseModel(**objs[key])
-            str_list.append(str(obj))
-        print(str_list)
+        all_objs = storage.all()
+        obj_list = []
+        for k in all_objs:
+            obj_list.append(str(all_objs[k]))
+        print(obj_list)
 
     def help_all(self):
         print("Prints a list of string representation of all instances")
+
+    def do_update(self, line):
+        """ Updates an instance based on the class name and id.
+        (Ex: update BaseModel 1234-1234-1234 email "aibnb@mail.com")
+
+         Prints:
+           ** class name missing **: If the class name is missing,
+           ** class doesn't exist **: If the class name doesn’t exist,
+           ** instance id missing **: If the instance of the class name
+               doesn’t exist for the id
+           ** no instance found **: If the instance of the class name doesn’t
+                exist for the id
+           ** attribute name missing **: If the attribute name is missing
+         ** value missing **: If the value for the attribute name doesn’t exist
+        """
+        list = line.split()
+        if len(list) == 0:
+             print("** class name missing **")
+             return
+        if len(list) == 1:
+            print("** instance id missing **")
+            return
+        if len(list) >= 2 and list[0] != "BaseModel":
+            print("** class doesn't exist **")
+            return
+        if len(list) == 2 and list[0] == "BaseModel":
+            print("** attribute name missing **")
+            return
+        if len(list) == 3 and list[0] == "BaseModel":
+            print("** value missing **")
+            return
+        if len(list) >= 3 and list[0] == "BaseModel":
+            key = f"{list[0]}.{list[1]}"
+            objects = storage.all()
+            if key in objects.keys():
+                obj = objects[key]
+                obj[list[2]] = list[3]
+                storage.save()
+                print(obj)
+            else:
+                print("** no instance found **")
+
+    def help_update(self):
+        print("""Updates an instance based on the class name and id.
+Usage: update <class name> <id> <attribute name> "<attribute value>\n""")
+
+
+    def input_parcer(self, args):
+        """Returns a dictonary based on argument passed"""
+        new_dict = {}
+        for arg in args:
+            if "=" in arg:
+                kvp = arg.split('=', 1)
+                key = kvp[0]
+                value = kvp[1]
+                if value[0] == value[-1] == '"':
+                    value = shlex.split(value)[0].replace('_', ' ')
+                else:
+                    try:
+                        value = int(value)
+                    except:
+                        try:
+                            value = float(value)
+                        except:
+                            continue
+                new_dict[key] = value
+        return new_dict
 
     def emptyline(self):
         """Called when an empty line is entered in response to the prompt.

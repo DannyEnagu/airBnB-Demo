@@ -3,8 +3,18 @@
    contains ``FileStorage`` class
 """
 from models.base_model import BaseModel
+from models.place import Place
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 import json
 import os.path
+
+cls = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
+
 
 class FileStorage:
     """The ``FileStorage`` class serializes instances
@@ -42,8 +52,6 @@ class FileStorage:
         filename = self.__file_Path
         if os.path.exists(filename):
                 with open(filename, "r") as jsonfile:
-                    dicts = json.load(jsonfile)
-                    for k in dicts:
-                        #print(dicts[k])
-                        self.__objects[k] = BaseModel(dicts[k])
-                    #print(self.__objects)
+                    ds = json.load(jsonfile)
+                    for k in ds:
+                        self.__objects[k] = cls[ds[k]["__class__"]](**ds[k])
