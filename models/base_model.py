@@ -34,13 +34,13 @@ class BaseModel():
                                   updated every time you change your object.
         """
         if kwargs and len(kwargs) > 0:
-            for key in kwargs:
-                if key != "__class__":
-                    if key == "created_at" or key == "updated_at":
-                        self.__setattr__(key,
+            for k in kwargs:
+                if k != "__class__":
+                    if k == "created_at" or k == "updated_at":
+                        self.__setattr__(k,
                                          datetime.fromisoformat(kwargs[k]))
                     else:
-                        self.__setattr__(key, kwargs[key])
+                        self.__setattr__(k, kwargs[k])
         else:
             self.id = uuid4().__str__()
             self.created_at = datetime.now()
